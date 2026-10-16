@@ -43,8 +43,10 @@ RUN apt-get update \
 COPY --from=build /opt/recipe /opt/recipe
 WORKDIR /opt/recipe
 LABEL org.opencontainers.image.source="https://github.com/sybil-solutions/local-ai-images"
-# Any uid can run it (the plugin may not run it as root): logs/ and Triton's kernel cache must be writable
-RUN mkdir -p logs && chmod 1777 logs
+# Any uid can run it (the plugin may not run it as root): the log directories and Triton's kernel cache must be
+# writable. TabbyAPI writes logs/{time}.log relative to its own working directory (tabbyAPI/), not /opt/recipe/logs,
+# so that directory has to exist too - the API server exits at startup without it.
+RUN mkdir -p logs tabbyAPI/logs && chmod 1777 logs tabbyAPI/logs
 ENV TRITON_CACHE_DIR=/tmp/triton HOME=/tmp
 # Models: /models (Qwen3.8-27B-EXL3-SC3.0bpw-H4 and draft/Qwen3.8-27B-DFlash2-EXL3-3.0bpw), read-only is fine
 ENV EXL3_MODELS=/models
